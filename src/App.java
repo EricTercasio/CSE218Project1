@@ -24,8 +24,13 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         FileChooser fileChooser = new FileChooser();
+        Menu menu = new Menu("File");
+        MenuItem menuItem = new MenuItem("Open");
+        MenuItem menuItem2 = new MenuItem("Save");
+        menu.getItems().addAll(menuItem,menuItem2);
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().addAll(menu);
         TextArea textArea = new TextArea();
-        Button button = new Button("Open file");
         Button generateButton = new Button("Generate lyrics");
         TextField wordField = new TextField();
         wordField.setPromptText("Word");
@@ -34,7 +39,7 @@ public class App extends Application {
         HBox textFieldBox = new HBox(wordField, sizeField);
         textFieldBox.setAlignment(Pos.CENTER);
         textFieldBox.setSpacing(20);
-        button.setOnAction(e -> {
+        menuItem.setOnAction(e -> {
             File selection = fileChooser.showOpenDialog(null);
             if (selection != null) {
                 try (Scanner scanner = new Scanner(selection)) {
@@ -44,6 +49,10 @@ public class App extends Application {
                    // textArea.appendText(words.toString());
                     //textArea.appendText(Integer.toString(documentHelper.getTokens("[A-Za-z]\\w*").size()));
                     masterLinkedList = generateLinkList(words);
+                    textArea.appendText( "Number of words: " + String.valueOf(documentHelper.getNumberOfWords(fileContents)));
+                    textArea.appendText("\n Number of sentences: "+ String.valueOf(documentHelper.getNumberofSentences(fileContents)));
+                    textArea.appendText("\n Syllable count: " + String.valueOf(documentHelper.countSyllables(fileContents)));
+                    textArea.appendText("\n Flesch score: " + String.valueOf(documentHelper.getFleschScore(fileContents)));
                 } catch (FileNotFoundException e1) {
                     e1.printStackTrace();
                 }
@@ -51,19 +60,33 @@ public class App extends Application {
         });
         generateButton.setOnAction(e->{
             textArea.clear();
-            textArea.appendText("\t");
+            textArea.appendText("\t\t\t\t");
             String selectedWord = wordField.getText();
             int amountOfWords = Integer.valueOf(sizeField.getText());
             newLyrics = generateLyrics(masterLinkedList,selectedWord,amountOfWords);
             for(int i = 0; i < newLyrics.size(); i++){
                 if(i % 5 == 0){
-                    textArea.appendText("\t\n");
+                    textArea.appendText("\n\t\t\t\t");
                 }
                 textArea.appendText(newLyrics.get(i) + " ");
             }
         });
+        menuItem2.setOnAction(e->{
+            String newLyricsOut = "";
+            for(int i = 0; i < newLyrics.size(); i++){
+                newLyricsOut += newLyrics.get(i);
+                newLyricsOut += " ";
+            }
+            String dir = System.getProperty("user.dir");
+            File file = new File(dir + "\\save\\newLyrics.txt");
+            try(PrintWriter out = new PrintWriter(file)){
+                out.println(newLyricsOut);
+            } catch (FileNotFoundException e1) {
+                e1.printStackTrace();
+            }
+        });
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(button, textFieldBox, generateButton, textArea);
+        vBox.getChildren().addAll(menuBar, textFieldBox, generateButton, textArea);
         vBox.setAlignment(Pos.CENTER);
         vBox.setSpacing(40);
         Scene scene = new Scene(vBox, 400, 400);

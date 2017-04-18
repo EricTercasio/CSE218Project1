@@ -39,9 +39,22 @@ public class DocumentHelper {
         }
         return counter;
     }
-    //public abstract int getNumberOfWords();
+    public int getNumberOfWords(String pattern){
 
-    //public abstract int getNumberofSentences();
+        return pattern.split("\\w+").length;
+    }
 
-    //public Stri
+    public int getNumberofSentences(String pattern){
+        return pattern.split("[!?.:]+").length;
+    }
+
+    public String getText(){
+        return text;
+    }
+    public double getFleschScore(String pattern){
+        int words = getNumberOfWords(pattern);
+        int sentences = getNumberofSentences(pattern);
+        int syllables = countSyllables(pattern);
+        return (206.835 - (1.015*(words/sentences)) - (84.6 * (syllables/words)));
+    }
 }
